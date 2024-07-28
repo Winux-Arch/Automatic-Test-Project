@@ -1,0 +1,40 @@
+stages:
+  - build
+  - test
+  - release
+
+variables:
+  BUILD_DIR: build
+
+before_script:
+  - mkdir -p $BUILD_DIR
+  - cd $BUILD_DIR
+  - cmake ..
+
+build:
+  stage: build
+  script:
+    - make
+  artifacts:
+    paths:
+      - $BUILD_DIR
+
+test:
+  stage: test
+  script:
+    - cd $BUILD_DIR
+    - ctest --output-on-failure
+  dependencies:
+    - build
+
+release:
+  stage: release
+  script:
+    - mkdir -p release
+    - cp $BUILD_DIR/hello_test release/
+    - tar -czvf release.tar.gz release/
+  artifacts:
+    paths:
+      - release.tar.gz
+  only:
+    - tags
